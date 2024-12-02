@@ -1,3 +1,5 @@
+import programRepository from "./programRepository";
+
 // Some data to make the trick
 
 const programs = [
@@ -27,10 +29,28 @@ const programs = [
 
 import type { RequestHandler } from "express";
 
-const browse: RequestHandler = (req, res) => {
-  res.json(programs);
+const browse: RequestHandler = async (req, res) => {
+  const programsFromDB = await programRepository.readAll();
+
+  res.json(programsFromDB);
 };
+
+/* ************************************************************************* */
+
+const read: RequestHandler = (req, res) => {
+  const parsedId = Number.parseInt(req.params.id);
+
+  const program = programs.find((p) => p.id === parsedId);
+
+  if (program != null) {
+    res.json(program);
+  } else {
+    res.sendStatus(404);
+  }
+};
+
+/* ************************************************************************* */
 
 // Export it to import it somewhere else
 
-export default { browse };
+export default { browse, read };
