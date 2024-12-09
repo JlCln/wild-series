@@ -1,6 +1,5 @@
 import type { RequestHandler } from "express";
 import programRepository from "./programRepository";
-import { programSchema } from "./validator/programValidator";
 
 /* ************************************************************************* */
 
@@ -134,4 +133,4 @@ const destroy: RequestHandler = async (req, res, next): Promise<void> => {
   }
 };
 
-export default { browse, read, edit, add, destroy };
+export default { browse, read, readAll, edit, add, destroy };

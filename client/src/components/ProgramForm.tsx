@@ -61,7 +61,7 @@ function ProgramForm({ children, defaultValue, onSubmit }: ProgramFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="title">Title:</label>
+        <label htmlFor="title">Titre :</label>
         <input
           type="text"
           id="title"
@@ -73,7 +73,7 @@ function ProgramForm({ children, defaultValue, onSubmit }: ProgramFormProps) {
       </div>
       <div>
         <label>
-          Synopsis:
+          Synopsis :
           <input
             type="text"
             name="synopsis"
@@ -84,7 +84,7 @@ function ProgramForm({ children, defaultValue, onSubmit }: ProgramFormProps) {
       </div>
       <div>
         <label>
-          Poster URL:
+          Affiche :
           <input
             type="text"
             name="poster"
@@ -95,7 +95,7 @@ function ProgramForm({ children, defaultValue, onSubmit }: ProgramFormProps) {
       </div>
       <div>
         <label>
-          Country:
+          Pays :
           <input
             type="text"
             name="country"
@@ -106,7 +106,7 @@ function ProgramForm({ children, defaultValue, onSubmit }: ProgramFormProps) {
       </div>
       <div>
         <label>
-          Year:
+          Année :
           <input
             type="number"
             name="year"
@@ -117,7 +117,7 @@ function ProgramForm({ children, defaultValue, onSubmit }: ProgramFormProps) {
       </div>
       <div>
         <label>
-          Category:
+          Catégorie :
           <select
             name="category_id"
             value={formData.category_id}
