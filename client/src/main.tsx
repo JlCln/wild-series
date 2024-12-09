@@ -11,9 +11,10 @@ import App from "./App";
 // Import additional components for new routes
 // Try creating these components in the "pages" folder
 
-// import About from "./pages/About";
-// import Contact from "./pages/Contact";
-import Programs from "./pages/Programs";
+import ProgramDetail from "./pages/ProgramDetail";
+import ProgramEdit from "./pages/ProgramEdit";
+import ProgramIndex from "./pages/ProgramIndex";
+import ProgramNew from "./pages/ProgramNew";
 
 /* ************************************************************************* */
 
@@ -23,11 +24,25 @@ const router = createBrowserRouter([
   {
     path: "/", // The root path
     element: <App />, // Renders the App component for the home page
-  },
-  // Try adding a new route! For example, "/about" with an About component
-  {
-    path: "/programs",
-    element: <Programs />, // Renders the About component
+    children: [
+      {
+        path: "/programs",
+        element: <ProgramIndex />,
+        loader: () => fetch(`${import.meta.env.VITE_API_URL}/api/programs`),
+      },
+      {
+        path: "/programs/new",
+        element: <ProgramNew />,
+      },
+      {
+        path: "/programs/:id",
+        element: <ProgramDetail />,
+      },
+      {
+        path: "/programs/:id/edit",
+        element: <ProgramEdit />,
+      },
+    ],
   },
 ]);
 

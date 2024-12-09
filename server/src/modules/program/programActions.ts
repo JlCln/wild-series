@@ -1,56 +1,137 @@
-import programRepository from "./programRepository";
-
-// Some data to make the trick
-
-const programs = [
-  {
-    id: 1,
-    title: "The Good Place",
-    synopsis:
-      "À sa mort, Eleanor Shellstrop est envoyée au Bon Endroit, un paradis fantaisiste réservé aux individus exceptionnellement bienveillants. Or Eleanor n'est pas exactement une « bonne personne » et comprend vite qu'il y a eu erreur sur la personne. Avec l'aide de Chidi, sa prétendue âme sœur dans l'au-delà, la jeune femme est bien décidée à se redécouvrir.",
-    poster:
-      "https://img.betaseries.com/JwRqyGD3f9KvO_OlfIXHZUA3Ypw=/600x900/smart/https%3A%2F%2Fpictures.betaseries.com%2Ffonds%2Fposter%2F94857341d71c795c69b9e5b23c4bf3e7.jpg",
-    country: "USA",
-    year: 2016,
-  },
-  {
-    id: 2,
-    title: "Dark",
-    synopsis:
-      "Quatre familles affolées par la disparition d'un enfant cherchent des réponses et tombent sur un mystère impliquant trois générations qui finit de les déstabiliser.",
-    poster:
-      "https://img.betaseries.com/zDxfeFudy3HWjxa6J8QIED9iaVw=/600x900/smart/https%3A%2F%2Fpictures.betaseries.com%2Ffonds%2Fposter%2Fc47135385da176a87d0dd9177c5f6a41.jpg",
-    country: "Allemagne",
-    year: 2017,
-  },
-];
-
-// Declare the action
-
 import type { RequestHandler } from "express";
-
-const browse: RequestHandler = async (req, res) => {
-  const programsFromDB = await programRepository.readAll();
-
-  res.json(programsFromDB);
-};
+import programRepository from "./programRepository";
+import { programSchema } from "./validator/programValidator";
 
 /* ************************************************************************* */
 
-const read: RequestHandler = (req, res) => {
-  const parsedId = Number.parseInt(req.params.id);
+const browse: RequestHandler = async (_req, res, next) => {
+  try {
+    const programs = await programRepository.readAll();
+    res.json(programs);
+  } catch (err) {
+    next(err);
+  }
+};
 
-  const program = programs.find((p) => p.id === parsedId);
+const readAll: RequestHandler = async (req, res, next) => {
+  try {
+    const programsFromDB = await programRepository.readAll();
 
-  if (program != null) {
-    res.json(program);
-  } else {
-    res.sendStatus(404);
+    res.json(programsFromDB);
+  } catch (error) {
+    next(error);
   }
 };
 
 /* ************************************************************************* */
 
-// Export it to import it somewhere else
+const read: RequestHandler = async (req, res, next): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
 
-export default { browse, read };
+    if (Number.isNaN(id) || id <= 0) {
+      res.status(400).json({
+        error: "Invalid program ID",
+      });
+      return;
+    }
+
+    const program = await programRepository.read(id);
+
+    if (!program) {
+      res.sendStatus(404);
+      return;
+    }
+
+    res.json(program);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ************************************************************************* */
+
+const edit: RequestHandler = async (req, res, next): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    const updateData = req.body;
+
+    console.info("Received update data:", updateData);
+
+    if (Number.isNaN(id) || id <= 0) {
+      res.status(400).json({
+        error: "Invalid program ID",
+      });
+      return;
+    }
+
+    if (!updateData.title || !updateData.category_id) {
+      res.status(400).json({
+        error: "Title and category_id are required",
+      });
+      return;
+    }
+
+    const success = await programRepository.update(id, {
+      title: updateData.title,
+      synopsis: updateData.synopsis || "",
+      poster: updateData.poster || "",
+      country: updateData.country || "",
+      year: Number(updateData.year) || new Date().getFullYear(),
+      category_id: Number(updateData.category_id),
+    });
+
+    if (!success) {
+      res.status(400).json({
+        error: "Failed to update program",
+      });
+      return;
+    }
+
+    res.sendStatus(204);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ************************************************************************* */
+
+const add: RequestHandler = async (req, res, next) => {
+  try {
+    const newProgram = {
+      title: req.body.title,
+      synopsis: req.body.synopsis || "",
+      poster: req.body.poster || "",
+      country: req.body.country || "",
+      year: Number(req.body.year) || new Date().getFullYear(),
+      category_id: Number(req.body.category_id),
+    };
+
+    const insertId = await programRepository.create(newProgram);
+    res.status(201).json({ insertId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ************************************************************************* */
+
+const destroy: RequestHandler = async (req, res, next): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id) || id <= 0) {
+      res.status(400).json({
+        error: "Invalid program ID",
+      });
+      return;
+    }
+
+    await programRepository.delete(id);
+    res.sendStatus(204);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { browse, read, edit, add, destroy };
