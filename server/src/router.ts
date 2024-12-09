@@ -26,9 +26,13 @@ router.get("/", sayActions.sayWelcome);
 // Declaration of a "Program" route
 
 import programActions from "./modules/program/programActions";
+import { validateProgram } from "./modules/program/validator/programValidator";
 
 router.get("/api/programs", programActions.browse);
 router.get("/api/programs/:id", programActions.read);
+router.put("/api/programs/:id", validateProgram, programActions.edit);
+router.post("/api/programs", validateProgram, programActions.add);
+router.delete("/api/programs/:id", programActions.destroy);
 
 /* ************************************************************************* */
 
